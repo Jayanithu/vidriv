@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "../../../lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { fetchDriveVideos, getVideoMetadata } from "@/lib/drive";
+import { fetchDriveVideos, getVideoMetadata } from "../../../lib/drive";
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
