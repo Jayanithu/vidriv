@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Send properties to the client
-      session.accessToken = token.accessToken;
+      session.accessToken = token.accessToken as string | undefined;
       return session;
     },
   },
