@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import VideoCard from "./VideoCard";
+import VideoUrlInput from '../VideoUrlInput';
 interface DriveFile {
   id: string;
   name: string;
@@ -72,10 +73,13 @@ export default function FileList() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {videos.map((video) => (
-        <VideoCard key={video.id} video={video} />
-      ))}
+    <div className="container mx-auto p-4">
+      <VideoUrlInput />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {videos.map((video) => (
+          <VideoCard key={video.id} video={video} />
+        ))}
+      </div>
     </div>
   );
 }
