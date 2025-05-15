@@ -1,16 +1,8 @@
 import { google } from 'googleapis';
-interface DriveFile {
-  id: string;
-  name: string;
-  mimeType: string;
-  thumbnailLink?: string;
-  webContentLink?: string;
-  size?: string;
-  createdTime?: string;
-}
+import { DriveFile } from '@/types/drive';
 
 // Initialize the Google Drive API client
-export const initDriveClient = (accessToken: string) => {
+const initDriveClient = (accessToken: string) => {
   const oauth2Client = new google.auth.OAuth2();
   oauth2Client.setCredentials({ access_token: accessToken });
   
@@ -18,7 +10,7 @@ export const initDriveClient = (accessToken: string) => {
 };
 
 // Get list of video files from Google Drive
-export const getVideoFiles = async (accessToken: string): Promise<DriveFile[]> => {
+export const fetchDriveVideos = async (accessToken: string): Promise<DriveFile[]> => {
   const drive = initDriveClient(accessToken);
   
   // Query for video files
@@ -48,8 +40,8 @@ export const getVideoFiles = async (accessToken: string): Promise<DriveFile[]> =
   }
 };
 
-// Get a specific file by ID
-export const getFileById = async (accessToken: string, fileId: string): Promise<DriveFile> => {
+// Get metadata for a specific video
+export const getVideoMetadata = async (fileId: string, accessToken: string): Promise<DriveFile> => {
   const drive = initDriveClient(accessToken);
   
   try {
@@ -60,7 +52,12 @@ export const getFileById = async (accessToken: string, fileId: string): Promise<
     
     return response.data as DriveFile;
   } catch (error) {
-    console.error('Error fetching file:', error);
+    console.error('Error fetching video metadata:', error);
     throw error;
   }
+};
+
+// Create a streaming endpoint for a video
+export const getVideoStreamUrl = (fileId: string) => {
+  return `/api/stream?fileId=${fileId}`;
 };
