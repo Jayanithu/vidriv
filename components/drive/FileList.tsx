@@ -2,36 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { VideoFile } from "@/types/drive";
 import VideoCard from "./VideoCard";
-
+interface DriveFile {
+  id: string;
+  name: string;
+  thumbnailLink: string;
+  webViewLink: string;
+  webContentLink: string;
+  size: string;
+  mimeType: string;
+  modifiedTime: string; 
+}
 export default function FileList() {
   const { data: session } = useSession();
-  const [videos, setVideos] = useState<VideoFile[]>([]);
+  const [videos, setVideos] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchVideos() {
+    const fetchVideos = async () => {
       if (!session?.accessToken) return;
 
       try {
-        setLoading(true);
         const response = await fetch("/api/drive");
-        
-        if (!response.ok) {
-          throw new Error("Failed to fetch videos");
-        }
+        if (!response.ok) throw new Error("Failed to fetch videos");
         
         const data = await response.json();
         setVideos(data);
       } catch (err) {
-        console.error("Error fetching videos:", err);
-        setError("Failed to load videos from Google Drive");
+        setError("Error loading videos. Please try again.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchVideos();
   }, [session]);
@@ -46,25 +50,29 @@ export default function FileList() {
 
   if (error) {
     return (
-      <div className="bg-red-500 text-white p-4 rounded-md">
-        {error}
+      <div className="text-center p-8 bg-red-100 text-red-700 rounded-lg">
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
   if (videos.length === 0) {
     return (
-      <div className="text-center p-8 bg-gray-800 rounded-lg">
+      <div className="text-center p-8 bg-gray-100 rounded-lg">
         <h3 className="text-xl font-semibold mb-2">No videos found</h3>
-        <p className="text-gray-400">
-          No video files were found in your Google Drive. Upload some videos to get started.
-        </p>
+        <p className="text-gray-600">Upload videos to your Google Drive to see them here.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {videos.map((video) => (
         <VideoCard key={video.id} video={video} />
       ))}
