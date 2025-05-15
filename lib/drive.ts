@@ -1,53 +1,58 @@
-import { VideoFile } from "@/types/drive";
+import { google } from 'googleapis';
+import { DriveFile } from '@/types/drive';
 
-export async function fetchDriveVideos(accessToken: string): Promise<VideoFile[]> {
+// Initialize the Google Drive API client
+export const initDriveClient = (accessToken: string) => {
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  
+  return google.drive({ version: 'v3', auth: oauth2Client });
+};
+
+// Get list of video files from Google Drive
+export const getVideoFiles = async (accessToken: string): Promise<DriveFile[]> => {
+  const drive = initDriveClient(accessToken);
+  
+  // Query for video files
+  const videoMimeTypes = [
+    'video/mp4',
+    'video/x-matroska',
+    'video/quicktime',
+    'video/x-msvideo',
+    'video/x-ms-wmv',
+    'video/webm',
+  ];
+  
+  const mimeTypeQuery = videoMimeTypes.map(type => `mimeType='${type}'`).join(' or ');
+  const query = `(${mimeTypeQuery}) and trashed=false`;
+  
   try {
-    // Query for video files
-    const query = "mimeType contains 'video/'";
-    const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(
-      query
-    )}&fields=files(id,name,mimeType,thumbnailLink,webContentLink,size,createdTime)&pageSize=100`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await drive.files.list({
+      q: query,
+      fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, size, createdTime)',
+      pageSize: 100,
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch videos: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.files as VideoFile[];
-  } catch (error) {
-    console.error("Error fetching Drive videos:", error);
-    throw error;
-  }
-}
-
-export async function getVideoStreamUrl(fileId: string, accessToken: string): Promise<string> {
-  // For direct streaming, we'll use the files.get method with alt=media
-  return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${accessToken}`;
-}
-
-export async function getVideoMetadata(fileId: string, accessToken: string) {
-  try {
-    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,thumbnailLink,webContentLink,size,createdTime`;
     
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch video metadata: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return (response.data.files || []) as DriveFile[];
   } catch (error) {
-    console.error("Error fetching video metadata:", error);
+    console.error('Error fetching video files:', error);
     throw error;
   }
-}
+};
+
+// Get a specific file by ID
+export const getFileById = async (accessToken: string, fileId: string): Promise<DriveFile> => {
+  const drive = initDriveClient(accessToken);
+  
+  try {
+    const response = await drive.files.get({
+      fileId,
+      fields: 'id, name, mimeType, thumbnailLink, webContentLink, size, createdTime',
+    });
+    
+    return response.data as DriveFile;
+  } catch (error) {
+    console.error('Error fetching file:', error);
+    throw error;
+  }
+};
