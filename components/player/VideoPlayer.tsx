@@ -5,13 +5,20 @@ import Plyr from "plyr";
 import "plyr/dist/plyr.css";
 
 interface VideoPlayerProps {
-  src: string;
-  title: string;
+  fileId: string;
+  title?: string;
 }
 
-export default function VideoPlayer({ src, title }: VideoPlayerProps) {
+interface VideoPlayerState {
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number; 
+}
+
+export default function VideoPlayer({ fileId, title }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playerRef = useRef<Plyr>();
+  const playerRef = useRef<Plyr | null>(null); // Changed from undefined to null for better type safety
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -19,39 +26,38 @@ export default function VideoPlayer({ src, title }: VideoPlayerProps) {
     // Initialize Plyr
     playerRef.current = new Plyr(videoRef.current, {
       controls: [
-        "play-large",
-        "play",
-        "progress",
-        "current-time",
-        "mute",
-        "volume",
-        "captions",
-        "settings",
-        "pip",
-        "airplay",
-        "fullscreen",
+        'play-large', 'play', 'progress', 'current-time', 'mute', 
+        'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
       ],
       seekTime: 10,
       keyboard: { focused: true, global: true },
     });
 
     return () => {
-      playerRef.current?.destroy();
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
     };
   }, []);
 
+  const videoUrl = `/api/stream?fileId=${fileId}`;
+
   return (
-    <div className="w-full max-w-5xl mx-auto bg-black rounded-lg overflow-hidden">
+    <div className="plyr-container w-full bg-black rounded-lg overflow-hidden">
       <video
         ref={videoRef}
-        className="plyr-react plyr"
+        controls
         crossOrigin="anonymous"
         playsInline
       >
-        <source src={src} type="video/mp4" />
+        <source src={videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <h1 className="p-4 text-xl font-bold">{title}</h1>
+      {title && (
+        <div className="mt-4">
+          <h1 className="text-xl font-bold text-white">{title}</h1>
+        </div>
+      )}
     </div>
   );
 }
