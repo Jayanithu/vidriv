@@ -30,4 +30,13 @@ export default function Home() {
           </div>
           <div className="p-6 bg-gray-800 rounded-lg">
             <svg className="w-12 h-12 mx-auto mb-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684" />
+            </svg>
+            <h3 className="text-xl font-semibold mb-2">Share Easily</h3>
+            <p className="text-gray-400">Generate shareable links and embed codes for your videos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
