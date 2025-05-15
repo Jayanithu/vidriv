@@ -1,5 +1,13 @@
 import { google } from 'googleapis';
-import { DriveFile } from '@/types/drive';
+interface DriveFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  thumbnailLink?: string;
+  webContentLink?: string;
+  size?: string;
+  createdTime?: string;
+}
 
 // Initialize the Google Drive API client
 export const initDriveClient = (accessToken: string) => {
